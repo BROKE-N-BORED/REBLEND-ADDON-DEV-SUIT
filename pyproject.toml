@@ -1,0 +1,34 @@
+[project]
+name = "reblend-addon-dev-suite"
+version = "0.1.0"
+description = "Reblend Add-on Dev Suite — a desktop workstation for building add-on packs for Reblend and Blender."
+requires-python = ">=3.10"
+authors = [{ name = "Broke n Bored" }]
+# PySide6 is a CORE dependency, never optional: the suite is a GUI app,
+# and a GUI app whose toolkit lives in an optional extra installs broken
+# and dies silently on ModuleNotFoundError (MIMIK v0.1.x lesson, AGENTS.md).
+dependencies = ["PySide6>=6.6"]
+
+[project.scripts]
+devsuite = "devsuite.main:main"
+devsuite-uninstall = "installer.gui:main_uninstall"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+# The installer package ships inside the installed distribution:
+# the Uninstall menu entry runs `devsuite-uninstall` from the
+# venv, and the release tree may be deleted after installing, so
+# the uninstaller GUI cannot live only in the tree (Joshua's
+# order, 2026-11-18 — the Uninstall menu entry).
+[tool.setuptools.packages.find]
+include = ["devsuite*", "installer"]
+
+# The templates are data, not code: their .py files sit in folders with
+# no __init__.py, so setuptools would not ship them as packages. The
+# template lookup (devsuite.templates.template_dir) reads them from the
+# installed package, so they must ride along as package data — without
+# them, starting a project from a template breaks after install.
+[tool.setuptools.package-data]
+devsuite = ["templates/**/README.md", "templates/**/*.py"]
